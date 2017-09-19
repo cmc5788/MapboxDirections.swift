@@ -181,6 +181,13 @@ open class RouteOptions: NSObject, NSSecureCoding {
         self.attributeOptions = attributeOptions
         
         includesExitRoundaboutManeuver = decoder.decodeBool(forKey: "includesExitRoundaboutManeuver")
+        
+        
+        guard let excludeClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludeRoadClasses") as String?,
+            let excludeRoadClasses = RoadClasses(descriptions: excludeClassesDescriptions.components(separatedBy: ",")) else {
+                return nil
+        }
+        self.excludeRoadClasses = excludeRoadClasses
     }
     
     open static var supportsSecureCoding = true
@@ -195,6 +202,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
         coder.encode(routeShapeResolution.description, forKey: "routeShapeResolution")
         coder.encode(attributeOptions.description, forKey: "attributeOptions")
         coder.encode(includesExitRoundaboutManeuver, forKey: "includesExitRoundaboutManeuver")
+        coder.encode(excludeRoadClasses, forKey: "excludeRoadClasses")
     }
     
     // MARK: Specifying the Path of the Route
@@ -304,6 +312,13 @@ open class RouteOptions: NSObject, NSSecureCoding {
     open var includesExitRoundaboutManeuver = false
     
     /**
+     An Array of `RoadClass` that the routing engine will attempt to avoid.
+     
+     The order of this Array does not impact the results.
+     */
+    open var excludeRoadClasses: RoadClasses? = []
+    
+    /**
      An array of URL parameters to include in the request URL.
      */
     internal var params: [URLQueryItem] {
@@ -317,6 +332,10 @@ open class RouteOptions: NSObject, NSSecureCoding {
         
         if includesExitRoundaboutManeuver {
             params.append(URLQueryItem(name: "roundabout_exits", value: String(includesExitRoundaboutManeuver)))
+        }
+        
+        if let excludeRoadClasses = excludeRoadClasses, !excludeRoadClasses.isEmpty {
+            params.append(URLQueryItem(name: "exclude", value: excludeRoadClasses.description))
         }
         
         // Include headings and heading accuracies if any waypoint has a nonnegative heading.
