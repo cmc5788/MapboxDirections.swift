@@ -183,10 +183,8 @@ open class RouteOptions: NSObject, NSSecureCoding {
         includesExitRoundaboutManeuver = decoder.decodeBool(forKey: "includesExitRoundaboutManeuver")
         
         
-        guard let excludedRoadClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludedRoadClasses") as String?, let excludedRoadClasses = RoadClasses(descriptions: excludedRoadClassesDescriptions.components(separatedBy: ",")) else {
-                return nil
-        }
-        self.excludedRoadClasses = excludedRoadClasses
+        let excludedRoadClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludedRoadClasses") as String?
+        excludedRoadClasses = RoadClasses(descriptions: excludedRoadClassesDescriptions?.components(separatedBy: ",") ?? [""]) ?? []
     }
     
     open static var supportsSecureCoding = true
@@ -333,7 +331,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
             params.append(URLQueryItem(name: "roundabout_exits", value: String(includesExitRoundaboutManeuver)))
         }
         
-        if excludedRoadClasses != .none {
+        if !excludedRoadClasses.isEmpty && excludedRoadClasses != .none {
             params.append(URLQueryItem(name: "exclude", value: excludedRoadClasses.description))
         }
         
