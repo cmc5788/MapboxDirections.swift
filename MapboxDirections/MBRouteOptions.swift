@@ -183,11 +183,10 @@ open class RouteOptions: NSObject, NSSecureCoding {
         includesExitRoundaboutManeuver = decoder.decodeBool(forKey: "includesExitRoundaboutManeuver")
         
         
-        guard let excludeClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludeRoadClasses") as String?,
-            let excludeRoadClasses = RoadClasses(descriptions: excludeClassesDescriptions.components(separatedBy: ",")) else {
+        guard let excludedRoadClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludedRoadClasses") as String?, let excludedRoadClasses = RoadClasses(descriptions: excludedRoadClassesDescriptions.components(separatedBy: ",")) else {
                 return nil
         }
-        self.excludeRoadClasses = excludeRoadClasses
+        self.excludedRoadClasses = excludedRoadClasses
     }
     
     open static var supportsSecureCoding = true
@@ -202,7 +201,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
         coder.encode(routeShapeResolution.description, forKey: "routeShapeResolution")
         coder.encode(attributeOptions.description, forKey: "attributeOptions")
         coder.encode(includesExitRoundaboutManeuver, forKey: "includesExitRoundaboutManeuver")
-        coder.encode(excludeRoadClasses, forKey: "excludeRoadClasses")
+        coder.encode(excludedRoadClasses.description, forKey: "excludedRoadClasses")
     }
     
     // MARK: Specifying the Path of the Route
@@ -316,7 +315,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
      
      The order of this Array does not impact the results.
      */
-    open var excludeRoadClasses: RoadClasses? = []
+    open var excludedRoadClasses: RoadClasses = .none
     
     /**
      An array of URL parameters to include in the request URL.
@@ -334,8 +333,8 @@ open class RouteOptions: NSObject, NSSecureCoding {
             params.append(URLQueryItem(name: "roundabout_exits", value: String(includesExitRoundaboutManeuver)))
         }
         
-        if let excludeRoadClasses = excludeRoadClasses, !excludeRoadClasses.isEmpty {
-            params.append(URLQueryItem(name: "exclude", value: excludeRoadClasses.description))
+        if excludedRoadClasses != .none {
+            params.append(URLQueryItem(name: "exclude", value: excludedRoadClasses.description))
         }
         
         // Include headings and heading accuracies if any waypoint has a nonnegative heading.
