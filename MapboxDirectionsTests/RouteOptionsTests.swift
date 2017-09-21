@@ -34,5 +34,6 @@ class RouteOptionsTests: XCTestCase {
         XCTAssertEqual(unarchivedWaypoints[2].coordinate.longitude, coordinates[2].longitude)
         
         XCTAssertEqual(unarchivedOptions.profileIdentifier, options.profileIdentifier)
+        XCTAssertEqual(unarchivedOptions.roadClassesToAvoid, options.roadClassesToAvoid)
     }
 }
