@@ -183,8 +183,8 @@ open class RouteOptions: NSObject, NSSecureCoding {
         includesExitRoundaboutManeuver = decoder.decodeBool(forKey: "includesExitRoundaboutManeuver")
         
         
-        let excludedRoadClassesDescriptions = decoder.decodeObject(of: NSString.self, forKey: "excludedRoadClasses") as String?
-        excludedRoadClasses = RoadClasses(descriptions: excludedRoadClassesDescriptions?.components(separatedBy: ",") ?? [""]) ?? []
+        let roadClassesToAvoidDescriptions = decoder.decodeObject(of: NSString.self, forKey: "roadClassesToAvoid") as String?
+        roadClassesToAvoid = RoadClasses(descriptions: roadClassesToAvoidDescriptions?.components(separatedBy: ",") ?? []) ?? []
     }
     
     open static var supportsSecureCoding = true
@@ -199,7 +199,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
         coder.encode(routeShapeResolution.description, forKey: "routeShapeResolution")
         coder.encode(attributeOptions.description, forKey: "attributeOptions")
         coder.encode(includesExitRoundaboutManeuver, forKey: "includesExitRoundaboutManeuver")
-        coder.encode(excludedRoadClasses.description, forKey: "excludedRoadClasses")
+        coder.encode(roadClassesToAvoid.description, forKey: "roadClassesToAvoid")
     }
     
     // MARK: Specifying the Path of the Route
@@ -309,11 +309,11 @@ open class RouteOptions: NSObject, NSSecureCoding {
     open var includesExitRoundaboutManeuver = false
     
     /**
-     An Array of `RoadClass` that the routing engine will attempt to avoid.
+     The road classes that the resulting routes will avoid.
      
-     The order of this Array does not impact the results.
+     For example, you can set this property to `.toll` to avoid toll roads. No road classes are avoided by default. Currently, it is only possible to avoid one road class at a time.
      */
-    open var excludedRoadClasses: RoadClasses = []
+    open var roadClassesToAvoid: RoadClasses = []
     
     /**
      An array of URL parameters to include in the request URL.
@@ -331,8 +331,12 @@ open class RouteOptions: NSObject, NSSecureCoding {
             params.append(URLQueryItem(name: "roundabout_exits", value: String(includesExitRoundaboutManeuver)))
         }
         
-        if !excludedRoadClasses.isEmpty {
-            params.append(URLQueryItem(name: "exclude", value: excludedRoadClasses.description))
+        if !roadClassesToAvoid.isEmpty {
+            let allRoadClasses = roadClassesToAvoid.description.components(separatedBy: ",")
+            if allRoadClasses.count > 1 {
+                print("`roadClassesToAvoid` only accepts one `RoadClasses`. Although \(roadClassesToAvoid.description) was specified, only \(String(describing: allRoadClasses.first)) will be used.")
+            }
+            params.append(URLQueryItem(name: "exclude", value: roadClassesToAvoid.description))
         }
         
         // Include headings and heading accuracies if any waypoint has a nonnegative heading.
