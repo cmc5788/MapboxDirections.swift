@@ -313,7 +313,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
      
      The order of this Array does not impact the results.
      */
-    open var excludedRoadClasses: RoadClasses = .none
+    open var excludedRoadClasses: RoadClasses = []
     
     /**
      An array of URL parameters to include in the request URL.
@@ -331,7 +331,7 @@ open class RouteOptions: NSObject, NSSecureCoding {
             params.append(URLQueryItem(name: "roundabout_exits", value: String(includesExitRoundaboutManeuver)))
         }
         
-        if !excludedRoadClasses.isEmpty && excludedRoadClasses != .none {
+        if !excludedRoadClasses.isEmpty {
             params.append(URLQueryItem(name: "exclude", value: excludedRoadClasses.description))
         }
         
